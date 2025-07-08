@@ -1,6 +1,10 @@
+/*   get_mmap.c   */
+/*
+ * a program that outputs colors into the screen.
+ */
+
 #include <efi.h>
 #include <efilib.h>
-
 
 EFI_STATUS
 EFIAPI

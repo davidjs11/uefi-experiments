@@ -1,3 +1,8 @@
+/*   framebuffer.c   */
+/*
+ * a program that outputs colors into the screen.
+ */
+
 #include <efi.h>
 #include <efilib.h>
 
