@@ -1,0 +1,28 @@
+some UEFI programming experiments using the GNU-EFI framework.
+
+experiments:
+    - a program for getting the system's memory map
+    - a test for writing on screen's framebuffer
+
+requisites:
+    - gnu-efi (for using UEFI headers with gcc)
+    - objcopy (for converting ELF executables to PE32+)
+    - mtools
+    - qemu-system-x86_64
+    - a UEFI firmware image for booting up (OVMF recommended)
+
+using the Makefile:
+    you need to setup the first macros in order to compile the experiments.
+    you may change the default image for 'make run' on the Makefile. otherwise 
+    you can use 'make run TARGET=img/<target>.img'.
+
+booting the image:
+    you can burn the .img files into a USB drive using your favourite tool and
+    boot up the UEFI images on real hardware.
+    use at your own risk; i'm not responsible for any hardware damage.
+
+some resources:
+    - https://wiki.osdev.org/GNU-EFI
+    - https://wiki.osdev.org/UEFI_App_Bare_Bones
+    - https://wiki.osdev.org/GOP
+    - https://uefi.org/specs/UEFI/2.11/index.html
