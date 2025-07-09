@@ -67,7 +67,7 @@ $(IMG)/%.img: $(TMP)/%.efi
 	@mcopy -i $@ DATA.TXT ::/
 
 .PHONY: run
-run: $(DEF_TARGET)
+run: $(if $(TARGET),$(TARGET),$(DEF_TARGET))
 	@echo "running $(if $(TARGET),$(TARGET),$(DEF_TARGET))..."
 	@$(VM) \
 		-m $(MEMORY) \
