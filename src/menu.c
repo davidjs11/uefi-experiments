@@ -5,48 +5,14 @@
 #include <efi.h>
 #include <efilib.h>
 
-CHAR16 *entries[] = {
-    L"entry #00",
-    L"entry #01",
-    L"entry #02",
-    L"entry #03",
-    L"entry #04",
-    L"entry #05",
-    L"entry #06",
-    L"entry #07",
-    L"entry #08",
-    L"entry #09",
-    L"entry #10",
-    L"entry #11",
-    L"entry #12",
-    L"entry #13",
-    L"entry #14",
-    L"entry #15",
-    L"entry #16",
-    L"entry #17",
-    L"entry #18",
-    L"entry #19",
-    L"entry #20",
-    L"entry #21",
-    L"entry #22",
-    L"entry #23",
-    L"entry #24",
-    L"entry #25",
-    L"entry #26",
-    L"entry #27",
-    L"entry #28",
-    L"entry #29",
-    L"entry #30",
-    L"entry #31",
-    L"entry #32",
-    L"entry #33",
-};
+EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop;
 
 typedef struct {
     CHAR16          *title;                 /* menu title */
     CHAR16          **entries;              /* menu entries */
     size_t          size;                   /* number of entries */
     size_t          height;                 /* height of the menu */
+    void            (*print_entry)(int);
 } menu_t;
 
 UINT16 read_key(void) {
@@ -112,10 +78,10 @@ UINTN menu_select(menu_t *menu) {
                 ST->ConOut->SetAttribute, 2, 
                 ST->ConOut, 
                 (entry == selected_entry)
-                    ? EFI_BLUE | EFI_BACKGROUND_LIGHTGRAY
-                    : EFI_WHITE | EFI_BACKGROUND_BLUE
+                ? EFI_BLUE | EFI_BACKGROUND_LIGHTGRAY
+                : EFI_WHITE | EFI_BACKGROUND_BLUE
             );
-            Print(L"%s\n", menu->entries[entry]);
+            menu->print_entry(entry);
         }
 
         /* get next key (blocking) */
@@ -123,6 +89,27 @@ UINTN menu_select(menu_t *menu) {
     } while (pressed_key != 0x17);
 
     return selected_entry;
+}
+
+void print_videomem_entry(int i) {
+    UINTN SizeOfInfo;
+    EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *Info;
+    EFI_STATUS Status;
+    Status = uefi_call_wrapper(
+        Gop->QueryMode, 4,                          /* service */
+        Gop,                                        /* 'this' pointer */
+        (UINT32) i,                                 /* mode number */
+        &SizeOfInfo,                                /* size of info buffer */
+        &Info                                       /* info buffer */
+    );
+    if (EFI_ERROR(Status)) return;
+
+    /* print mode info */
+    Print(L"mode #%03u: %ux%u\n", 
+          i,
+          Info->HorizontalResolution,
+          Info->VerticalResolution
+    );
 }
 
 EFI_STATUS
@@ -133,14 +120,34 @@ efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
     ST = SystemTable;
     EFI_STATUS Status;
 
-    menu_t menu = {
-        .title = (CHAR16 *) L"menu title",
-        .entries = entries,
-        .size = 34,
-        .height = 20,
-    };
-    Print(L"selected entry: %u", menu_select(&menu));
-    while (1);
+    /* search GOP protocol */
+    EFI_GUID GopGUID = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+    Status = uefi_call_wrapper(
+        ST->BootServices->LocateProtocol, 3,        /* service */
+        &GopGUID,                                   /* GOP's GUID */
+        NULL,                                       /* ignorable */
+        &Gop                                        /* Gop interface pointer */
+    );
+    if (EFI_ERROR(Status)) return Status;
 
+    /* create a menu with video modes */
+    menu_t menu = {
+        .title = (CHAR16 *) L"select a video mode",
+        .size = Gop->Mode->MaxMode,
+        .height = 20,
+        .print_entry = &print_videomem_entry,
+    };
+
+    /* display menu and select video mode */
+    while (1) {
+        Status = uefi_call_wrapper(
+            Gop->SetMode, 2,
+            Gop,                                    /* GOP interface */
+            menu_select(&menu)                      /* video mode index */
+        );
+        if (EFI_ERROR(Status)) return Status;
+    }
+
+    while (1);
     return EFI_SUCCESS;
 }
