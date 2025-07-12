@@ -57,25 +57,17 @@ efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
         Gop->Mode->Info->PixelsPerScanLine
     );
 
-    /* print something */
-    /* print a red rectangle */
-    // for (int y = 0; y < 200; y++) {
-    //     for (int x = 0; x < 200; x++) {
-    //         *((UINT32 *) Gop->Mode->FrameBufferBase+(Gop->Mode->Info->PixelsPerScanLine * y)+x) = 0xFF0000;
-    //     }
-    // }
-
     /* fill the screen with red green and blue */
-    // UINT32 color = 0x00000000;
-    // for (int i = 0; i < Gop->Mode->Info->HorizontalResolution*Gop->Mode->Info->VerticalResolution; i++) {
-    //     if (i % Gop->Mode->Info->PixelsPerScanLine < Gop->Mode->Info->PixelsPerScanLine / 3)
-    //         color = 0xFFFF0000;
-    //     else if (i % Gop->Mode->Info->PixelsPerScanLine < 2*Gop->Mode->Info->PixelsPerScanLine / 3)
-    //         color = 0xFF00FF00;
-    //     else if (i % Gop->Mode->Info->PixelsPerScanLine < Gop->Mode->Info->PixelsPerScanLine)
-    //         color = 0xFF0000FF;
-    //     *((UINT32 *) Gop->Mode->FrameBufferBase+i) = color;
-    // }
+    UINT32 color = 0x00000000;
+    for (int i = 0; i < Gop->Mode->Info->HorizontalResolution*Gop->Mode->Info->VerticalResolution; i++) {
+        if (i % Gop->Mode->Info->PixelsPerScanLine < Gop->Mode->Info->PixelsPerScanLine / 3)
+            color = 0xFFFF0000;
+        else if (i % Gop->Mode->Info->PixelsPerScanLine < 2*Gop->Mode->Info->PixelsPerScanLine / 3)
+            color = 0xFF00FF00;
+        else if (i % Gop->Mode->Info->PixelsPerScanLine < Gop->Mode->Info->PixelsPerScanLine)
+            color = 0xFF0000FF;
+        *((UINT32 *) Gop->Mode->FrameBufferBase+i) = color;
+    }
 
     while (1);
     return EFI_SUCCESS;

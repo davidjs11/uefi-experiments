@@ -4,6 +4,7 @@ experiments:
     - a program for getting the system's memory map
     - a test for writing on screen's framebuffer
     - a file opening and reading program
+    - a menu program for testing keyboard input
 
 requisites:
     - gnu-efi (for using UEFI headers with gcc)

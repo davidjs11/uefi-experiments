@@ -3,7 +3,7 @@
 # CHANGE THIS TO YOUR OWN SETTINGS !
 FIRMWARE_BIN	:= ovmf/ovmfx64.bin
 GNU_EFI_DIR		:= gnu-efi
-DEF_TARGET		:= img/files.img		# default target, changeable
+DEF_TARGET		:= img/menu.img		# default target, changeable
 
 SRC				:= src
 TMP				:= tmp
